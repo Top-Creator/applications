@@ -1,0 +1,103 @@
+{
+  "homepage": "https://dashboard.topcreator.com/",
+  "name": "top-creator_application",
+  "version": "0.0.1",
+  "main": ".tsbuild/index.js",
+  "type": "commonjs",
+  "description": "Application for TopCreator",
+  "repository": "https://github.com/Top-Creator/topCreator_application",
+  "publish": {
+    "provider": "github",
+    "releaseType": "release",
+    "owner": "Top-Creator",
+    "repo": "topCreator_application"
+  },
+  "author": "TopCreator <vlad@topcreator.com>",
+  "license": "MIT",
+  "scripts": {
+    "dev": "yarn tsc && electron .tsbuild/index.js",
+    "build": "yarn tsc && electron-builder",
+    "dist": "yarn tsc && electron-builder --publish always",
+    "tsc": "tsc",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "dependencies": {
+    "@todesktop/runtime": "^1.6.2",
+    "electron-updater": "^6.1.8",
+    "puppeteer-core": "^22.3.0",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@electron/notarize": "^2.3.2",
+    "@electron/osx-sign": "^1.3.0",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "@types/chrome": "^0.0.260",
+    "@types/node": "^20.11.18",
+    "@types/puppeteer": "^7.0.4",
+    "@typescript-eslint/eslint-plugin": "^7.2.0",
+    "@typescript-eslint/parser": "^7.2.0",
+    "electron": "^29.1.0",
+    "electron-builder": "^24.13.3",
+    "eslint": "^8.57.0"
+  },
+  "build": {
+    "publish": {
+      "provider": "github",
+      "releaseType": "draft",
+      "owner": "Top-Creator",
+      "repo": "applications",
+      "private": false,
+      "token": "***"
+    },
+    "appId": "com.topcreator.application",
+    "productName": "TopCreator",
+    "nsis": {
+      "oneClick": false
+    },
+    "extraMetadata": {
+      "name": "TopCreator"
+    },
+    "win": {
+      "icon": "logo.ico"
+    },
+    "mac": {
+      "extendInfo": {
+        "ElectronTeamID": "BGUC5BMT7Y"
+      },
+      "identity": "BGUC5BMT7Y",
+      "entitlements": "build/entitlements.mas.plist",
+      "entitlementsInherit": "build/entitlements.mas.inherit.plist",
+      "provisioningProfile": "build/TopCreatorElectron.provisionprofile",
+      "category": "public.app-category.business",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "icon": "icon.png",
+      "notarize": true,
+      "type": "distribution",
+      "target": [
+        {
+          "target": "default",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ]
+    },
+    "files": [
+      ".tsbuild/**/*.js"
+    ],
+    "extraResources": [
+      {
+        "from": "Chromium.app",
+        "to": "Chromium.app"
+      },
+      {
+        "from": "chromium",
+        "to": "chromium"
+      }
+    ],
+    "afterSign": "build/sing.js"
+  }
+}

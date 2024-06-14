@@ -1,0 +1,7 @@
+{
+    "id": "240520339tx3ftk",
+    "icon": "./icon.png",
+    "appPath": ".",
+    "schemaVersion": 1,
+    "appFiles": [".tsbuild/**/*.js"]
+}
