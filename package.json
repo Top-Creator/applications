@@ -1,11 +1,11 @@
 {
   "homepage": "https://dashboard.topcreator.com/",
   "name": "top-creator_application",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": ".tsbuild/index.js",
   "type": "commonjs",
   "description": "Application for TopCreator",
-  "repository": "https://github.com/Top-Creator/topCreator_application",
+  "repository": "https://github.com/Top-Creator/applications",
   "publish": {
     "provider": "github",
     "releaseType": "release",
@@ -37,7 +37,7 @@
     "@types/puppeteer": "^7.0.4",
     "@typescript-eslint/eslint-plugin": "^7.2.0",
     "@typescript-eslint/parser": "^7.2.0",
-    "electron": "^29.1.0",
+    "electron": "29.1.0",
     "electron-builder": "^24.13.3",
     "eslint": "^8.57.0"
   },
