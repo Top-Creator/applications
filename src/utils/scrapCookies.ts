@@ -1,20 +1,33 @@
-import { Browser, Cookie, Page } from 'puppeteer-core'
+import { BrowserView } from 'electron'
 import updateCookies from '../api/updateCookies'
 
-const scrapCookies = async (page: Page, browser: Browser, token: string) => {
-    const localStorage = await page.evaluate(() =>  Object.assign({}, window.localStorage))
-    const cookies: Cookie[] = await page.cookies()
-    const userAgent = await browser.userAgent()
+const scrapCookies = async (newSession: Electron.Session , newWindow: BrowserView, token: string) => {
+
+    const cookies = await newSession.cookies.get({})
+
+    const localStorageResult = await newWindow.webContents.executeJavaScript(`
+            (function() {
+                return {
+                    localStorage: JSON.stringify(window.localStorage),
+                    userAgent: navigator.userAgent
+                };
+            })();
+        `)
+
+    const localStorageData = JSON.parse(localStorageResult.localStorage)
+    const userAgent = localStorageResult.userAgent
+
+
     updateCookies({
         input: {
             user_agent: userAgent || '',
             user_id: cookies.find((cookie) => cookie.name === 'auth_id')?.value || '',
-            x_bc: localStorage.bcTokenSha,
+            x_bc: localStorageData.bcTokenSha,
             cookie: cookies.map((cookie) => `${cookie.name}=${cookie.value}`).join('; '),
-            expiredAt: new Date(cookies.find((cookie) => cookie.name === 'sess')?.expires * 1000).toISOString() || new Date().toISOString()
+            expiredAt: new Date(cookies.find((cookie) => cookie.name === 'sess')?.expirationDate * 1000).toISOString() || new Date().toISOString()
         },
         changeAppAuthAppInput2: {
-            bcTokenSha: localStorage.bcTokenSha,
+            bcTokenSha: localStorageData.bcTokenSha,
             sess: cookies.find((cookie) => cookie.name === 'sess')?.value || '',
             user_id: cookies.find((cookie) => cookie.name === 'auth_id')?.value || ''
         }

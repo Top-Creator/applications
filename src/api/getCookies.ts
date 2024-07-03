@@ -1,6 +1,6 @@
 import {BACKEND_URL} from '../env'
 
-interface CookiesData {
+export interface CookiesData {
     data: {
         getCreatorById: {
             appAuth: {

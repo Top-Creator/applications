@@ -1,7 +1,7 @@
 {
   "homepage": "https://dashboard.topcreator.com/",
   "name": "top-creator_application",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "main": ".tsbuild/index.js",
   "type": "commonjs",
   "description": "Application for TopCreator",
@@ -12,7 +12,7 @@
     "owner": "Top-Creator",
     "repo": "topCreator_application"
   },
-  "author": "TopCreator <vlad@topcreator.com>",
+  "author": "TopCreator <subs@topcreator.com>",
   "license": "MIT",
   "scripts": {
     "dev": "yarn tsc && electron .tsbuild/index.js",
@@ -50,7 +50,7 @@
       "private": false,
       "token": "***"
     },
-    "appId": "com.topcreator.application",
+    "appId": "com.topcreator.app",
     "productName": "TopCreator",
     "nsis": {
       "oneClick": false
@@ -63,12 +63,12 @@
     },
     "mac": {
       "extendInfo": {
-        "ElectronTeamID": "BGUC5BMT7Y"
+        "ElectronTeamID": "S3J557W47A"
       },
-      "identity": "BGUC5BMT7Y",
+      "identity": "S3J557W47A",
       "entitlements": "build/entitlements.mas.plist",
       "entitlementsInherit": "build/entitlements.mas.inherit.plist",
-      "provisioningProfile": "build/TopCreatorElectron.provisionprofile",
+      "provisioningProfile": "build/TopCreator.provisionprofile",
       "category": "public.app-category.business",
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
@@ -79,24 +79,14 @@
         {
           "target": "default",
           "arch": [
-            "x64",
-            "arm64"
+            "arm64",
+            "x64"
           ]
         }
       ]
     },
     "files": [
       ".tsbuild/**/*.js"
-    ],
-    "extraResources": [
-      {
-        "from": "Chromium.app",
-        "to": "Chromium.app"
-      },
-      {
-        "from": "chromium",
-        "to": "chromium"
-      }
     ],
     "afterSign": "build/sing.js"
   }

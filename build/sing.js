@@ -20,10 +20,10 @@ async function sing(context) {
         })
 
     await notarize({
-        appBundleId: 'com.topcreator.application',
-        appleId: 'topcreatorcom@gmail.com',
-        appleIdPassword:'lscj-joph-cjzm-mxzb',
-        teamId: 'BGUC5BMT7Y',
+        appBundleId: 'com.topcreator.app',
+        appleId: 'subs@topcreator.com',
+        appleIdPassword:'wxwu-weht-jxlm-raxh',
+        teamId: 'S3J557W47A',
         tool: 'notarytool',
         appPath: `${appOutDir}/${appName}.app`,
     }).then(function () {
