@@ -106,14 +106,6 @@ export const  openOnlyfansWindow = async (args: { id?: string, proxyData?: Proxy
                 }
             })
 
-            // Логіка для оновлення кукі коли юзер авторизувався
-            newWindow.webContents.session.webRequest.onCompleted({urls: ['*://onlyfans.com/api2/v2/users/login*']}, async (details) => {
-                if (details.statusCode === 200) {
-                    setTimeout(() => scrapCookies(newSession, newWindow, args.token), 10 * 1000)
-                    scrapCookies(newSession, newWindow, args.token)
-                }
-            })
-
             newWindow.webContents.loadURL('https://onlyfans.com')
 
             // Логіка для трекінсу старту сессій
@@ -132,10 +124,16 @@ export const  openOnlyfansWindow = async (args: { id?: string, proxyData?: Proxy
                     handleActivity(browserViewsSession, args.id, 'request')
                 }
 
-                // const regex = /^https:\/\/onlyfans\.com\/api2\/v2\/stories/
-                // if (regex.test(details.url)) {
-                //     newWindow.webContents.loadURL('https://onlyfans.com/my/chats/')
-                // }
+                const regexForStories = /^https:\/\/onlyfans\.com\/api2\/v2\/stories/
+                const regexForLogin = /^https:\/\/onlyfans\.com\/api2\/v2\/users\/login/
+
+                if (regexForStories.test(details.url)) {
+                    newWindow.webContents.loadURL('https://onlyfans.com/my/chats/')
+                }
+
+                if (regexForLogin.test(details.url) && details.statusCode === 200) {
+                    setTimeout(() => scrapCookies(newSession, newWindow, args.token), 10 * 1000)
+                }
             })
 
             // Логіка отримання id чата через трекінг надсилання повідомлення та підтвердження активності через активність в чаті
@@ -162,6 +160,17 @@ export const  openOnlyfansWindow = async (args: { id?: string, proxyData?: Proxy
                 callback({})
             })
 
+            // Логіка для видалення поля bcTokenSha перед авторизацією
+            newWindow.webContents.session.webRequest.onBeforeRequest({urls: ['*://onlyfans.com/api2/v2/users/login*']}, async (details, callback) => {
+                newWindow.webContents.executeJavaScript('localStorage.removeItem("bcTokenSha")')
+                    .then(() => {
+                        callback({})
+                    })
+                    .catch(err => {
+                        win.webContents.send('error', `Failed to clear localStorage before login ${err}`)
+                        callback({})
+                    })
+            })
 
             newWindow.webContents.once('did-finish-load', async () => {
                 // Видалення кукі
@@ -264,11 +273,20 @@ export const  openOnlyfansWindow = async (args: { id?: string, proxyData?: Proxy
                             document.head.appendChild(script);
                         })();
                         
-                        // // Додавання стилів
-                        // const style = document.createElement('style');
-                        // style.innerHTML = '.l-header__menu__item { display: none !important; }';
-                        // document.head.appendChild(style);
+                        // Додавання стилів
+                        const style = document.createElement('style');
                         
+                        style.innerHTML = '.l-header__menu__item { display: none !important; }' +
+                                           '.dropdown { display: none !important; }' +
+                                           '.b-chat__subheader { display: none !important; }'+
+                                           '.g-page__header__btn { display: none !important; }'+
+                                           '.b-chat__message .g-avatar { display: none !important; }'+
+                                            '.b-chats__item__btn-clear { display: none !important; }'+
+                                            '.b-tabs__nav { display: none !important; }'+
+                                            
+                               '.b-chat__header__wrapper { display: none !important; }';
+                              
+                        // document.head.appendChild(style);
                  `)
                 } catch (error) {
                     win.webContents.send('error', `Failed to set injection script: ${error.message}`)

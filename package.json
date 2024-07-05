@@ -1,7 +1,7 @@
 {
   "homepage": "https://dashboard.topcreator.com/",
   "name": "top-creator_application",
-  "version": "0.1.0-win",
+  "version": "0.1.1",
   "main": ".tsbuild/index.js",
   "type": "commonjs",
   "description": "Application for TopCreator",
