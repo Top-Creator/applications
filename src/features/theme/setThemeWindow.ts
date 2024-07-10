@@ -1,5 +1,5 @@
-import {BrowserWindow} from 'electron'
-import {onlyfansWindowsType} from '../windowsManagement/types'
+import { BrowserWindow } from 'electron'
+import { onlyfansWindowsType } from '../windowsManagement/types'
 
 export const setThemeWindow = (id: string, theme: string, onlyfansWindows: onlyfansWindowsType, win: BrowserWindow) => {
     if (onlyfansWindows.has(id)) {

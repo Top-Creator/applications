@@ -1,3 +1,3 @@
-import {BrowserView} from 'electron'
+import { BrowserView } from 'electron'
 
 export type onlyfansWindowsType = Map<string, BrowserView>

@@ -1,6 +1,6 @@
-import {BrowserWindow} from 'electron'
-import {hideOnlyfansWindows} from './hideOnlyfansWindows'
-import {onlyfansWindowsType} from './types'
+import { BrowserWindow } from 'electron'
+import { hideOnlyfansWindows } from './hideOnlyfansWindows'
+import { onlyfansWindowsType } from './types'
 
 export const showOnlyfansWindow = (id:string, onlyfansWindows: onlyfansWindowsType, win: BrowserWindow) => {
     const view = onlyfansWindows.get(id)

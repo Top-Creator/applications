@@ -1,4 +1,4 @@
-import {onlyfansBrowserSessionType, trackedActivityType,  TrackedTime} from './types'
+import { onlyfansBrowserSessionType, trackedActivityType,  TrackedTime } from './types'
 
 
 function calculateActiveTime(activities: trackedActivityType[]) {
@@ -37,11 +37,10 @@ function calculateActiveTime(activities: trackedActivityType[]) {
 
 
 
-export const getTrackedTimes =(browserViewsSessions):TrackedTime[] => {
+export const getTrackedTimes =(browserViewsSessions: onlyfansBrowserSessionType):TrackedTime[] => {
     const trackedTimes = []
 
     browserViewsSessions.forEach((sessionData, id) => {
-        const chatsIds = Array.from(sessionData.chats)
         const { activeTime, idleTime } = calculateActiveTime(sessionData.activities)
         const totalTime = (sessionData.sessions.reduce((total, session) => {
             if (session.closeTime) {
@@ -51,7 +50,7 @@ export const getTrackedTimes =(browserViewsSessions):TrackedTime[] => {
             }
         }, 0)) / 1000
 
-        trackedTimes.push({ id, totalTime, activeTime, idleTime, chatsIds })
+        trackedTimes.push({ id, totalTime, activeTime, idleTime })
     })
 
     return trackedTimes

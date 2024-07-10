@@ -1,5 +1,5 @@
-import {BrowserWindow} from 'electron'
-import {onlyfansWindowsType} from './types'
+import { BrowserWindow } from 'electron'
+import { onlyfansWindowsType } from './types'
 
 export const  switchBrowserView  = async(id: string, theme: string, onlyfansWindows: onlyfansWindowsType, win: BrowserWindow)  =>{
     const view = onlyfansWindows.get(id)

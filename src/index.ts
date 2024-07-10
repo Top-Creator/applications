@@ -1,17 +1,16 @@
-import {app, BrowserWindow, ipcMain} from 'electron'
+import { app, BrowserWindow, ipcMain } from 'electron'
 import path from 'path'
-import {autoUpdater} from 'electron-updater'
-import {openOnlyfansWindow} from './features/windowsManagement/openOnlyfansWindow'
-import {closeOnlyfansWindow} from './features/windowsManagement/closeOnlyfansWindow'
-import {closeAllOnlyfansWindows} from './features/windowsManagement/closeAllOnlyfansWindows'
-import {switchBrowserView} from './features/windowsManagement/switchBrowserView'
-import {showOnlyfansWindow} from './features/windowsManagement/showOnlyfansWindow'
-import {hideOnlyfansWindows} from './features/windowsManagement/hideOnlyfansWindows'
-import {setThemeWindow} from './features/theme/setThemeWindow'
-import {getTrackedTimes} from './features/trackingWindows/trackingTime'
-import {onlyfansWindowsType} from './features/windowsManagement/types'
-import {onlyfansBrowserSessionType} from './features/trackingWindows/types'
-import {FRONTEND_URL} from './env'
+import { autoUpdater } from 'electron-updater'
+import { openOnlyfansWindow } from '@features/windowsManagement/openOnlyfansWindow'
+import { closeOnlyfansWindow } from '@features/windowsManagement/closeOnlyfansWindow'
+import { closeAllOnlyfansWindows } from '@features/windowsManagement/closeAllOnlyfansWindows'
+import { switchBrowserView } from '@features/windowsManagement/switchBrowserView'
+import { showOnlyfansWindow } from '@features/windowsManagement/showOnlyfansWindow'
+import { hideOnlyfansWindows } from '@features/windowsManagement/hideOnlyfansWindows'
+import { setThemeWindow } from '@features/theme/setThemeWindow'
+import { onlyfansWindowsType } from '@features/windowsManagement/types'
+import { onlyfansBrowserSessionType } from '@features/trackingWindows/types'
+import { FRONTEND_URL } from './env'
 
 autoUpdater.autoDownload = true
 
@@ -97,5 +96,5 @@ ipcMain.handle('set-dark-theme', async (_, args) => {
 
 ipcMain.handle('error', async (_, err) => {
     win.webContents.send('error', err)
-    return {err: 'error'}
+    return { err: 'error' }
 })

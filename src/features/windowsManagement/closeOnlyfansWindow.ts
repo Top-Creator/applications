@@ -1,5 +1,5 @@
-import {BrowserWindow} from 'electron'
-import {onlyfansWindowsType} from './types'
+import { BrowserWindow } from 'electron'
+import { onlyfansWindowsType } from './types'
 
 export function closeOnlyfansWindow(id: string, onlyfansWindows:onlyfansWindowsType, win: BrowserWindow ) {
     if (onlyfansWindows.has(id)) {

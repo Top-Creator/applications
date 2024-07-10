@@ -8,24 +8,25 @@ export interface ProxyData {
 }
 
 contextBridge.exposeInMainWorld('electron', {
-    openOnlyfans: async ({id, token, proxyData,widthSidebar, theme}: {
+    openOnlyfans: async ({ id, token, proxyData,widthSidebar, theme, isUserOwnerTeam }: {
         id?: string,
         proxyData?: ProxyData,
         token?: string,
         widthSidebar?: number,
-        theme?: string
+        theme?: string,
+        isUserOwnerTeam?: boolean
     }) => {
         try {
-            await ipcRenderer.invoke('open-onlyfans-window', {id, proxyData,token, widthSidebar, theme})
+            await ipcRenderer.invoke('open-onlyfans-window', { id, proxyData,token, widthSidebar, theme, isUserOwnerTeam })
         } catch (error) {
             await ipcRenderer.invoke('error', error.message)
-            await ipcRenderer.invoke('close-onlyfans-window', {id})
+            await ipcRenderer.invoke('close-onlyfans-window', { id })
             throw new Error(error.message)
         }
     },
 
     closeOnlyfans: async (id : string) => {
-        await ipcRenderer.invoke('close-onlyfans-window', {id})
+        await ipcRenderer.invoke('close-onlyfans-window', { id })
     },
 
     closeAllWindows: async () => {
@@ -37,17 +38,17 @@ contextBridge.exposeInMainWorld('electron', {
     },
 
     showOnlyfansWindow: async ( id : string) => {
-        await ipcRenderer.invoke('show-onlyfans-window', {id})
+        await ipcRenderer.invoke('show-onlyfans-window', { id })
     },
 
 
     setAppTheme: async (id:string, theme: string) => {
-        await ipcRenderer.invoke('set-dark-theme', {id, theme})
+        await ipcRenderer.invoke('set-dark-theme', { id, theme })
     },
 
     switchOnlyfansWindow: async (id : string ,theme:string) => {
         try {
-            await ipcRenderer.invoke('switch-onlyfans-window', {id, theme})
+            await ipcRenderer.invoke('switch-onlyfans-window', { id, theme })
         } catch (error) {
             await ipcRenderer.invoke('error', error.message)
             throw new Error(error.message)

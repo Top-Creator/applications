@@ -1,21 +1,26 @@
-import {ProxyData} from '../../preloads/mainWindowPreload'
-import {getCookies} from '../../api/getCookies'
-import {BrowserView, BrowserWindow, session} from 'electron'
+import { ProxyData } from '@preloads/mainWindowPreload'
+import { getCookies } from '@api/getCookies'
+import { BrowserView, BrowserWindow, session } from 'electron'
 import scrapCookies from '../../utils/scrapCookies'
-import {SCRIPT_URL} from '../../env'
-import {onlyfansWindowsType} from './types'
-import {onlyfansBrowserSessionType} from '../trackingWindows/types'
-import {handleActivity} from '../trackingWindows/trackingTime'
-import {extractChatId} from '../trackingWindows/trackingChats'
+import { onlyfansWindowsType } from './types'
+import { chatActivityType, onlyfansBrowserSessionType } from '../trackingWindows/types'
+import { handleActivity } from '../trackingWindows/trackingTime'
+import { extractChatId } from '../trackingWindows/trackingChats'
+import { getTeamMemberId } from '@api/getInfoByToken'
+import { saveTrackingDataForChats } from '@requests/sendTrackingDataForChats'
+import { SCRIPT_URL } from '../../env'
 
-export const  openOnlyfansWindow = async (args: { id?: string, proxyData?: ProxyData, token?: string, theme?: string }, onlyfansWindows: onlyfansWindowsType, win: BrowserWindow, browserViewsSession: onlyfansBrowserSessionType) => {
+export const openOnlyfansWindow = async (args: { id?: string, proxyData?: ProxyData, token?: string, theme?: string, isUserOwnerTeam: boolean }, onlyfansWindows: onlyfansWindowsType, win: BrowserWindow, browserViewsSession: onlyfansBrowserSessionType) => {
 
-    const {data: cookiesData} = await getCookies(args.id, args.token)
+    const chatActivity:chatActivityType = new Map()
+    const cookiesData = await getCookies(args.id, args.token)
+
+    const userTeamData = await  getTeamMemberId(cookiesData.getCreatorById.creatorAuth.user_id , args.token)
 
     let newWindow: BrowserView
 
     const userAgent = cookiesData.getCreatorById.creatorAuth.user_agent
-    const newSession: Electron.Session = session.fromPartition('persist:newOnlyfansSession')
+    const newSession: Electron.Session = session.fromPartition(`persist:newOnlyfansSession + ${args.id}`, { cache: false })
 
     if (userAgent && userAgent !== 'null') {
         newSession.setUserAgent(userAgent)
@@ -38,12 +43,12 @@ export const  openOnlyfansWindow = async (args: { id?: string, proxyData?: Proxy
     const proxyRules = `http=${proxyData.host}:${proxyData.port};https=${proxyData.host}:${proxyData.port}`
 
 
-    newSession.setProxy({proxyRules: proxyRules})
+    newSession.setProxy({ proxyRules: proxyRules })
         .then(() => {
 
             newSession.webRequest.onBeforeSendHeaders((details, callback) => {
                 details.requestHeaders['Proxy-Authorization'] = 'Basic ' + Buffer.from(`${proxyData.username}:${proxyData.password}`).toString('base64')
-                callback({requestHeaders: details.requestHeaders})
+                callback({ requestHeaders: details.requestHeaders })
             })
 
             newWindow = new BrowserView({
@@ -109,7 +114,7 @@ export const  openOnlyfansWindow = async (args: { id?: string, proxyData?: Proxy
             newWindow.webContents.loadURL('https://onlyfans.com')
 
             // Логіка для трекінсу старту сессій
-            const trackedSessions = browserViewsSession.get(args.id)  || { sessions: [], activities: [], chats: new Set() }
+            const trackedSessions = browserViewsSession.get(args.id)  || { sessions: [], activities: [] }
             trackedSessions.sessions.push({ openTime: Date.now() })
             browserViewsSession.set(args.id, trackedSessions)
 
@@ -119,62 +124,57 @@ export const  openOnlyfansWindow = async (args: { id?: string, proxyData?: Proxy
                 }
             })
 
-            newWindow.webContents.session.webRequest.onCompleted({urls: ['*://onlyfans.com/*']}, async (details) => {
+            //Логіка отримання id чата через трекінг надсилання повідомлення та підтвердження активності через активність в чаті
+            newWindow.webContents.session.webRequest.onCompleted({ urls: ['*://onlyfans.com/*'] }, async (details) => {
                 if (details.statusCode === 200) {
                     handleActivity(browserViewsSession, args.id, 'request')
                 }
 
                 const regexForStories = /^https:\/\/onlyfans\.com\/api2\/v2\/stories/
                 const regexForLogin = /^https:\/\/onlyfans\.com\/api2\/v2\/users\/login/
+                const regexForChats = /^https:\/\/onlyfans\.com\/api2\/v2\/chats\//
 
-                if (regexForStories.test(details.url)) {
+                if (regexForStories.test(details.url) && !args.isUserOwnerTeam) {
                     newWindow.webContents.loadURL('https://onlyfans.com/my/chats/')
                 }
 
                 if (regexForLogin.test(details.url) && details.statusCode === 200) {
                     setTimeout(() => scrapCookies(newSession, newWindow, args.token), 10 * 1000)
                 }
-            })
 
-            // Логіка отримання id чата через трекінг надсилання повідомлення та підтвердження активності через активність в чаті
-            newWindow.webContents.session.webRequest.onBeforeRequest( { urls: ['*://onlyfans.com/*/*/chats/*'] }, (details, callback) => {
-                const chatId = extractChatId(details.url)
+                if (regexForChats.test(details.url)) {
+                    const chatId = extractChatId(details.url)
 
-                const activities = browserViewsSession.get(args.id)?.activities
-                const timeApprovalActivity = 2 * 60 * 1000 // 2 min
+                    const activities = browserViewsSession.get(args.id)?.activities
+                    const timeApprovalActivity = 2 * 60 * 1000 // 2 min
 
+                    if (activities) {
+                        const currentTime = Date.now()
 
-                if (activities) {
-                    const currentTime = Date.now()
+                        activities.forEach(activity => {
+                            if (currentTime - activity.timestamp <= timeApprovalActivity) {
+                                activity.requestMade = true
+                            }
+                        })
+                    }
 
-                    activities.forEach(activity => {
-                        if (currentTime - activity.timestamp <= timeApprovalActivity) {
-                            activity.requestMade = true
+                    if (chatId) {
+                        if (chatActivity.has(chatId)) {
+                            let msgsSent = chatActivity.get(chatId).msgsSent
+                            msgsSent++
+                            chatActivity.set(chatId,  { msgsSent: msgsSent })
+                        } else {
+                            chatActivity.set(chatId, { msgsSent: 1 })
                         }
-                    })
+                    }
                 }
 
-                if (chatId) {
-                    browserViewsSession.get(args.id)?.chats.add(chatId)
-                }
-                callback({})
-            })
-
-            // Логіка для видалення поля bcTokenSha перед авторизацією
-            newWindow.webContents.session.webRequest.onBeforeRequest({urls: ['*://onlyfans.com/api2/v2/users/login*']}, async (details, callback) => {
-                newWindow.webContents.executeJavaScript('localStorage.removeItem("bcTokenSha")')
-                    .then(() => {
-                        callback({})
-                    })
-                    .catch(err => {
-                        win.webContents.send('error', `Failed to clear localStorage before login ${err}`)
-                        callback({})
-                    })
             })
 
             newWindow.webContents.once('did-finish-load', async () => {
                 // Видалення кукі
-                await newSession.clearStorageData({storages: ['cookies']})
+                await newSession.clearStorageData({ storages: ['cookies'] })
+                await newSession.clearStorageData({ storages: ['localstorage'] })
 
                 // Встановлення кукі
                 await Promise.all([
@@ -214,6 +214,15 @@ export const  openOnlyfansWindow = async (args: { id?: string, proxyData?: Proxy
                         path: '/',
                         secure: true,
                         httpOnly: false
+                    }),
+                    newSession.cookies.set({
+                        url: 'https://onlyfans.com',
+                        name: 'fp',
+                        value: cookiesData.getCreatorById.creatorAuth?.x_bc || '',
+                        domain: '.onlyfans.com',
+                        path: '/',
+                        secure: true,
+                        httpOnly: false
                     })
                 ])
 
@@ -245,17 +254,6 @@ export const  openOnlyfansWindow = async (args: { id?: string, proxyData?: Proxy
                      `)
                 }
 
-                // Логіка закінчення трекінсу сесій
-                newWindow.webContents.on('destroyed', () => {
-                    console.log('destroyed')
-                    const viewSessions = browserViewsSession.get(args.id).sessions
-                    if (viewSessions && viewSessions.length > 0) {
-                        const currentSession = viewSessions[viewSessions.length - 1]
-                        currentSession.closeTime = Date.now()
-                    }
-                })
-
-
                 // Перезавантаження сторінки
                 newWindow.webContents.reload()
 
@@ -273,10 +271,24 @@ export const  openOnlyfansWindow = async (args: { id?: string, proxyData?: Proxy
                             document.head.appendChild(script);
                         })();
                         
-                        // Додавання стилів
-                        const style = document.createElement('style');
+                 ` )
+
+                    newWindow.webContents.executeJavaScript(`
+                        const styleBase = document.createElement('style');
                         
-                        style.innerHTML = '.l-header__menu__item { display: none !important; }' +
+                        styleBase.innerHTML =  '.b-reminder-form {  display: none !important; }'+
+                                            '.b-chat__messages {  height: 70% !important; flex: unset !important; }'+
+                                            '.b-chat__header { min-height: 16px !important; }';
+
+                          document.head.appendChild(styleBase);
+                 ` )
+
+                    //Додавання скрипту для видалення всіх стилів якщо це не овнер акаунту
+                    !args.isUserOwnerTeam && newWindow.webContents.executeJavaScript(` 
+                    // Додавання стилів
+                        const styleLimitation = document.createElement('style');
+                        
+                        styleLimitation.innerHTML = '.l-header__menu__item { display: none !important; }' +
                                            '.dropdown { display: none !important; }' +
                                            '.b-chat__subheader { display: none !important; }'+
                                            '.g-page__header__btn { display: none !important; }'+
@@ -285,11 +297,27 @@ export const  openOnlyfansWindow = async (args: { id?: string, proxyData?: Proxy
                                             '.b-tabs__nav { display: none !important; }'+
                                             
                                '.b-chat__header__wrapper { display: none !important; }';
-                              
-                        // document.head.appendChild(style);
-                 `)
+
+                          document.head.appendChild(styleLimitation);
+                        `)
                 } catch (error) {
                     win.webContents.send('error', `Failed to set injection script: ${error.message}`)
+                }
+            })
+
+            // Логіка закінчення трекінсу сесій
+            newWindow.webContents.on('destroyed', async () => {
+
+                if (chatActivity.size > 0) {
+                    await saveTrackingDataForChats(userTeamData.getInfoByTokenApp.teamMemberId, chatActivity, args.token , win)
+
+                }
+
+
+                const viewSessions = browserViewsSession.get(args.id).sessions
+                if (viewSessions && viewSessions.length > 0) {
+                    const currentSession = viewSessions[viewSessions.length - 1]
+                    currentSession.closeTime = Date.now()
                 }
             })
 

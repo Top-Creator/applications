@@ -1,5 +1,12 @@
 node_modules/
-src/env.ts
-chromium/
 dist/
-.tsbuild/
+.tsbuild
+Chromium.app
+chromium
+.env
+src/env.ts
+
+package-lock.json
+yarn.lock
+.DS_Store
+*DS_Store

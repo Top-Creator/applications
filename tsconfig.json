@@ -8,7 +8,16 @@
     "skipLibCheck": true,
     "outDir": ".tsbuild",
     "moduleResolution": "node",
-    "allowJs": true
+    "allowJs": true,
+    "downlevelIteration": true,
+    "baseUrl": "./src",
+    "paths": {
+      "@api/*": ["api/*"],
+      "@features/*": ["features/*"],
+      "@preloads/*": ["preloads/*"],
+      "@requests/*": ["requests/*"],
+      "@utils/*": ["utils/*"]
+    }
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.js"]
 }

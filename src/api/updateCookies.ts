@@ -1,4 +1,5 @@
-import {BACKEND_URL} from '../env'
+import { BACKEND_URL } from '../env'
+import { mutation } from './index'
 
 export const SCRAP_COOKIES = `
   mutation ChangeCreatorAuthByApp($input: ChangeCreatorAuthInput $changeAppAuthAppInput2: AppDataAppInput) {
@@ -22,36 +23,14 @@ export interface ScrapCookiesInputType {
     }
 }
 
-const updateCookies = async (vars: ScrapCookiesInputType, token: string) => {
-    const requestData = {
-        query: SCRAP_COOKIES,
-        variables: {
-            input: vars.input,
-            changeAppAuthAppInput2: vars.changeAppAuthAppInput2
-        }
+export const updateCookies = async (vars: ScrapCookiesInputType, token: string) => {
+    const variables = {
+        input: vars.input,
+        changeAppAuthAppInput2: vars.changeAppAuthAppInput2
     }
 
-    return fetch(BACKEND_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(requestData)
-    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok')
-            }
-            return response.json()
-        })
-        .then(data => {
-            return data
-        })
-        .catch(error => {
-            console.error('There was a problem with the fetch operation:', error)
-            throw error
-        })
+    return mutation<{ changeCreatorAuthByApp, changeAppAuthApp }>(BACKEND_URL, token, SCRAP_COOKIES, variables)
 }
 
 export default updateCookies
+

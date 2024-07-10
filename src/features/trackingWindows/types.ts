@@ -1,5 +1,8 @@
 
-export type onlyfansBrowserSessionType = Map<string, { sessions: trackedSessionType[], activities: trackedActivityType[], chats: Set<string> }>
+export type onlyfansBrowserSessionType = Map<string, { sessions: trackedSessionType[], activities: trackedActivityType[] }>
+
+export type chatActivityType = Map<string, { msgsSent: number }>
+
 
 export interface trackedActivityType {
     timestamp: number;
@@ -17,5 +20,4 @@ export interface TrackedTime {
     totalTime: number;
     activeTime: number;
     idleTime: number;
-    chatsIds: string[]
 }

@@ -1,6 +1,6 @@
-import {BrowserWindow} from 'electron'
-import {onlyfansWindowsType} from './types'
-import {onlyfansBrowserSessionType} from '../trackingWindows/types'
+import { BrowserWindow } from 'electron'
+import { onlyfansWindowsType } from './types'
+import { onlyfansBrowserSessionType } from '../trackingWindows/types'
 
 
 export const closeAllOnlyfansWindows = (onlyfansWindows:onlyfansWindowsType, win: BrowserWindow, browserViewsSession: onlyfansBrowserSessionType) => {
@@ -13,8 +13,8 @@ export const closeAllOnlyfansWindows = (onlyfansWindows:onlyfansWindowsType, win
         }
 
         if (view) {
-            win.removeBrowserView(view)
             view.webContents.close()
+            win.removeBrowserView(view)
             onlyfansWindows.delete(id)
             win.webContents.send('browser_closed', id)
         }
