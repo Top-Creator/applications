@@ -277,7 +277,7 @@ export const openOnlyfansWindow = async (args: { id?: string, proxyData?: ProxyD
                         const styleBase = document.createElement('style');
                         
                         styleBase.innerHTML =  '.b-reminder-form {  display: none !important; }'+
-                                            '.b-chat__messages {  height: 78% !important; flex: unset !important; }'+
+                                            '.b-chat__messages {  height: 66% !important; flex: unset !important; }'+
 
                           document.head.appendChild(styleBase);
                  ` )
@@ -292,6 +292,7 @@ export const openOnlyfansWindow = async (args: { id?: string, proxyData?: ProxyD
                                            '.b-chat__message .g-avatar { display: none !important; }'+
                                            '.g-page__header__btn { display: none !important; }'+
                                             '.b-chats__item__btn-clear { display: none !important; }'+
+                                             '.b-chat__messages {  height: 65% !important; flex: unset !important; }'+
                                             '.b-tabs__nav { display: none !important; }';
 
                           document.head.appendChild(styleLimitation);
