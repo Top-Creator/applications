@@ -277,8 +277,7 @@ export const openOnlyfansWindow = async (args: { id?: string, proxyData?: ProxyD
                         const styleBase = document.createElement('style');
                         
                         styleBase.innerHTML =  '.b-reminder-form {  display: none !important; }'+
-                                            '.b-chat__messages {  height: 70% !important; flex: unset !important; }'+
-                                            '.b-chat__header { min-height: 16px !important; }';
+                                            '.b-chat__messages {  height: 78% !important; flex: unset !important; }'+
 
                           document.head.appendChild(styleBase);
                  ` )
@@ -290,13 +289,10 @@ export const openOnlyfansWindow = async (args: { id?: string, proxyData?: ProxyD
                         
                         styleLimitation.innerHTML = '.l-header__menu__item { display: none !important; }' +
                                            '.dropdown { display: none !important; }' +
-                                           '.b-chat__subheader { display: none !important; }'+
-                                           '.g-page__header__btn { display: none !important; }'+
                                            '.b-chat__message .g-avatar { display: none !important; }'+
+                                           '.g-page__header__btn { display: none !important; }'+
                                             '.b-chats__item__btn-clear { display: none !important; }'+
-                                            '.b-tabs__nav { display: none !important; }'+
-                                            
-                               '.b-chat__header__wrapper { display: none !important; }';
+                                            '.b-tabs__nav { display: none !important; }';
 
                           document.head.appendChild(styleLimitation);
                         `)
