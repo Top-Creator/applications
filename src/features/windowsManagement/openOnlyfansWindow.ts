@@ -133,8 +133,11 @@ export const openOnlyfansWindow = async (args: { id?: string, proxyData?: ProxyD
                 const regexForStories = /^https:\/\/onlyfans\.com\/api2\/v2\/stories/
                 const regexForLogin = /^https:\/\/onlyfans\.com\/api2\/v2\/users\/login/
                 const regexForChats = /^https:\/\/onlyfans\.com\/api2\/v2\/chats\//
+                const regexCheckVisitToOtherAccount = /^https:\/\/onlyfans\.com\/api2\/v2\/users\/profile\/visit/
 
-                if (regexForStories.test(details.url) && !args.isUserOwnerTeam) {
+                const regexCheckStatsOtherAccount = /^https:\/\/onlyfans\.com\/api2\/v2\/users\/profile\/stats-collect/
+
+                if (regexForStories.test(details.url) && regexCheckStatsOtherAccount.test(details.url) && regexCheckVisitToOtherAccount.test(details.url) && !args.isUserOwnerTeam  ) {
                     newWindow.webContents.loadURL('https://onlyfans.com/my/chats/')
                 }
 
@@ -278,6 +281,7 @@ export const openOnlyfansWindow = async (args: { id?: string, proxyData?: ProxyD
                         
                         styleBase.innerHTML =  '.b-reminder-form {  display: none !important; }'+
                                             '.b-chat__messages {  height: 66% !important; flex: unset !important; }'+
+                                             '.b-make-post__textarea-wrapper {  max-height: 130px !important; overflow: auto !important; }'+
 
                           document.head.appendChild(styleBase);
                  ` )
