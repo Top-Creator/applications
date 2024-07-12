@@ -22,12 +22,12 @@ const scrapCookies = async (newSession: Electron.Session , newWindow: BrowserVie
         input: {
             user_agent: userAgent || '',
             user_id: cookies.find((cookie) => cookie.name === 'auth_id')?.value || '',
-            x_bc: localStorageData.bcTokenSha,
+            x_bc: localStorageData.bcTokenSha || '',
             cookie: cookies.map((cookie) => `${cookie.name}=${cookie.value}`).join('; '),
             expiredAt: new Date(cookies.find((cookie) => cookie.name === 'sess')?.expirationDate * 1000).toISOString() || new Date().toISOString()
         },
         changeAppAuthAppInput2: {
-            bcTokenSha: localStorageData.bcTokenSha,
+            bcTokenSha: localStorageData.bcTokenSha || '',
             sess: cookies.find((cookie) => cookie.name === 'sess')?.value || '',
             user_id: cookies.find((cookie) => cookie.name === 'auth_id')?.value || ''
         }

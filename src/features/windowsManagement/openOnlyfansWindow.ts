@@ -150,7 +150,7 @@ export const openOnlyfansWindow = async (args: { id?: string, proxyData?: ProxyD
                 }
 
                 if (regexForLogin.test(details.url) && details.statusCode === 200) {
-                    setTimeout(() => scrapCookies(newSession, newWindow, args.token), 10 * 1000)
+                    setTimeout(() => scrapCookies(newSession, newWindow, args.token),1000)
                 }
 
                 if (regexForChats.test(details.url)) {
@@ -289,7 +289,7 @@ export const openOnlyfansWindow = async (args: { id?: string, proxyData?: ProxyD
                         
                         styleBase.innerHTML =  '.b-reminder-form {  display: none !important; }'+
                                             '.b-chat__messages {  height: 66% !important; flex: unset !important; }'+
-                                             '.b-make-post__textarea-wrapper {  max-height: 130px !important; overflow: auto !important; }'+
+                                             '.b-make-post__textarea-wrapper {  max-height: 100px !important; overflow: auto !important; }'+
 
                           document.head.appendChild(styleBase);
                  ` )
@@ -305,7 +305,8 @@ export const openOnlyfansWindow = async (args: { id?: string, proxyData?: ProxyD
                                            '.g-page__header__btn { display: none !important; }'+
                                             '.b-chats__item__btn-clear { display: none !important; }'+
                                              '.b-chat__messages {  height: 65% !important; flex: unset !important; }'+
-                                            '.b-tabs__nav { display: none !important; }';
+                                            '.b-tabs__nav { display: none !important; }' + 
+                                             '.b-make-post__textarea-wrapper {  max-height: 120px !important; overflow: auto !important; }';
 
                           document.head.appendChild(styleLimitation);
                         `)
