@@ -137,7 +137,15 @@ export const openOnlyfansWindow = async (args: { id?: string, proxyData?: ProxyD
 
                 const regexCheckStatsOtherAccount = /^https:\/\/onlyfans\.com\/api2\/v2\/users\/profile\/stats-collect/
 
-                if (regexForStories.test(details.url) && regexCheckStatsOtherAccount.test(details.url) && regexCheckVisitToOtherAccount.test(details.url) && !args.isUserOwnerTeam  ) {
+                if (regexCheckStatsOtherAccount.test(details.url) && !args.isUserOwnerTeam  ) {
+                    newWindow.webContents.loadURL('https://onlyfans.com/my/chats/')
+                }
+
+                if (regexCheckVisitToOtherAccount.test(details.url) && !args.isUserOwnerTeam  ) {
+                    newWindow.webContents.loadURL('https://onlyfans.com/my/chats/')
+                }
+
+                if (regexForStories.test(details.url) && !args.isUserOwnerTeam  ) {
                     newWindow.webContents.loadURL('https://onlyfans.com/my/chats/')
                 }
 
