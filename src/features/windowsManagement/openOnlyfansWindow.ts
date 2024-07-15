@@ -182,7 +182,7 @@ export const openOnlyfansWindow = async (args: { id?: string, proxyData?: ProxyD
 
             })
 
-            newWindow.webContents.once('did-finish-load', async () => {
+            newWindow.webContents.on('did-finish-load', async () => {
                 // Видалення кукі
                 await newSession.clearStorageData({ storages: ['cookies'] })
                 await newSession.clearStorageData({ storages: ['localstorage'] })
