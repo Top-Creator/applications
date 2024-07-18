@@ -19,17 +19,18 @@ const scrapCookies = async (newSession: Electron.Session , newWindow: BrowserVie
 
 
     updateCookies({
-        input: {
-            user_agent: userAgent || '',
-            user_id: cookies.find((cookie) => cookie.name === 'auth_id')?.value || '',
-            x_bc: localStorageData.bcTokenSha || '',
-            cookie: cookies.map((cookie) => `${cookie.name}=${cookie.value}`).join('; '),
-            expiredAt: new Date(cookies.find((cookie) => cookie.name === 'sess')?.expirationDate * 1000).toISOString() || new Date().toISOString()
+        input : {
+            ...(userAgent !== 'null' && { user_agent: userAgent }),
+            ...(cookies.find(cookie => cookie.name === 'auth_id')?.value !== 'null' && { user_id: cookies.find(cookie => cookie.name === 'auth_id').value }),
+            ...(localStorageData.bcTokenSha !== 'null' && { x_bc: localStorageData.bcTokenSha }),
+            ...(cookies.length > 0 && { cookie: cookies.map(cookie => `${cookie.name}=${cookie.value}`).join('; ') }),
+            ...(cookies.find(cookie => cookie.name === 'sess') && { expiredAt: new Date(cookies.find(cookie => cookie.name === 'sess').expirationDate * 1000).toISOString() || new Date().toISOString() })
         },
-        changeAppAuthAppInput2: {
-            bcTokenSha: localStorageData.bcTokenSha || '',
-            sess: cookies.find((cookie) => cookie.name === 'sess')?.value || '',
-            user_id: cookies.find((cookie) => cookie.name === 'auth_id')?.value || ''
+
+        changeAppAuthAppInput2 : {
+            ...(localStorageData.bcTokenSha !== 'null' && { bcTokenSha: localStorageData.bcTokenSha }),
+            ...(cookies.find(cookie => cookie.name === 'sess')?.value !== 'null' && { sess: cookies.find(cookie => cookie.name === 'sess').value }),
+            ...(cookies.find(cookie => cookie.name === 'auth_id')?.value !== 'null' && { user_id: cookies.find(cookie => cookie.name === 'auth_id').value })
         }
     }, token).then(() => {
         console.log('Cookies updated')

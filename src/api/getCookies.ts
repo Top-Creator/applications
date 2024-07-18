@@ -1,7 +1,7 @@
-import { BACKEND_URL } from '../env'
-import { query } from './index'
+import {BACKEND_URL} from '../env'
 
 export interface CookiesData {
+    data: {
         getCreatorById: {
             appAuth: {
                 bcTokenSha: string
@@ -16,31 +16,47 @@ export interface CookiesData {
                 isVerified: boolean
             }
         }
+    }
 }
 
-export const getCookies = async (creatorId: string, token: string): Promise<CookiesData> => {
-    const queryStr = `
-        query GetCreatorById($creatorId: String) {
-            getCreatorById(creatorId: $creatorId) {
-                appAuth {
-                    bcTokenSha
-                    sess
-                }
-                creatorAuth {
-                    user_agent
-                    x_bc
-                    user_id
-                    cookie
-                    expiredAt
-                    isVerified
-                }
-            }
-        }
-    `
+export const getCookies = async (creatorId : string, token: string ):Promise<CookiesData> => {
+    const query = `
+  query GetCreatorById($creatorId: String) {
+    getCreatorById(creatorId: $creatorId) {
+      appAuth {
+        bcTokenSha
+        sess
+      }
+      creatorAuth {
+        user_agent
+        x_bc
+        user_id
+        cookie
+        expiredAt
+        isVerified
+      }
+    }
+  }
+`
 
     const variables = {
         creatorId: creatorId
     }
 
-    return query<CookiesData>(BACKEND_URL, token, queryStr, variables)
+    const fetchOptions = {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+            query: query,
+            variables: variables
+        })
+    }
+
+
+    const res  = await  fetch(BACKEND_URL, fetchOptions)
+
+    return await res.json()
 }

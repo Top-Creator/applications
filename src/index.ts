@@ -79,7 +79,7 @@ ipcMain.handle('close-all-window', async () => {
 })
 
 ipcMain.handle('switch-onlyfans-window', async (_, args) => {
-    switchBrowserView(args.id, args.theme, onlyfansWindows, win)
+    await  switchBrowserView(args.id, args.theme, onlyfansWindows, win)
 })
 
 ipcMain.handle('hide-onlyfans-windows', async () => {

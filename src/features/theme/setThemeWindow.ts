@@ -18,6 +18,8 @@ export const setThemeWindow = (id: string, theme: string, onlyfansWindows: onlyf
             window.webContents.reload()
         }
 
+        window.webContents.loadURL('https://onlyfans.com')
+
     } else {
         win.webContents.send('error', `Window with id ${id} not found.`)
     }

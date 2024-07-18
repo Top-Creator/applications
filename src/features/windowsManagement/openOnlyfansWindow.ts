@@ -13,9 +13,9 @@ import { SCRIPT_URL } from '../../env'
 export const openOnlyfansWindow = async (args: { id?: string, proxyData?: ProxyData, token?: string, theme?: string, isUserOwnerTeam: boolean }, onlyfansWindows: onlyfansWindowsType, win: BrowserWindow, browserViewsSession: onlyfansBrowserSessionType) => {
 
     const chatActivity:chatActivityType = new Map()
-    const cookiesData = await getCookies(args.id, args.token)
+    const { data:cookiesData } = await getCookies(args.id, args.token)
 
-    const userTeamData = await  getTeamMemberId(cookiesData.getCreatorById.creatorAuth.user_id , args.token)
+    const { data: userTeamData } = await  getTeamMemberId(cookiesData.getCreatorById.creatorAuth.user_id , args.token)
 
     let newWindow: BrowserView
 
@@ -56,7 +56,7 @@ export const openOnlyfansWindow = async (args: { id?: string, proxyData?: ProxyD
                     session: newSession,
                     nodeIntegration: false,
                     contextIsolation: true,
-                    devTools: false
+                    devTools: true
                 }
             })
 
@@ -182,23 +182,30 @@ export const openOnlyfansWindow = async (args: { id?: string, proxyData?: ProxyD
 
             })
 
-            newWindow.webContents.on('did-finish-load', async () => {
+            newWindow.webContents.once('did-finish-load', async () => {
                 // Видалення кукі
                 await newSession.clearStorageData({ storages: ['cookies'] })
                 await newSession.clearStorageData({ storages: ['localstorage'] })
 
                 // Встановлення кукі
-                await Promise.all([
-                    newSession.cookies.set({
-                        url: 'https://onlyfans.com',
-                        name: 'sess',
-                        value: cookiesData.getCreatorById.appAuth?.sess || '',
-                        domain: '.onlyfans.com',
-                        path: '/',
-                        secure: true,
-                        httpOnly: false,
-                        expirationDate: new Date(cookiesData.getCreatorById.creatorAuth?.expiredAt).getTime() / 1000
-                    }),
+                const cookiePromises = []
+
+                if (cookiesData.getCreatorById.appAuth?.sess) {
+                    cookiePromises.push(
+                        newSession.cookies.set({
+                            url: 'https://onlyfans.com',
+                            name: 'sess',
+                            value: cookiesData.getCreatorById.appAuth.sess,
+                            domain: '.onlyfans.com',
+                            path: '/',
+                            secure: true,
+                            httpOnly: false,
+                            expirationDate: new Date(cookiesData.getCreatorById.creatorAuth?.expiredAt).getTime() / 1000
+                        })
+                    )
+                }
+
+                cookiePromises.push(
                     newSession.cookies.set({
                         url: 'https://onlyfans.com',
                         name: 'cookiesAccepted',
@@ -207,41 +214,76 @@ export const openOnlyfansWindow = async (args: { id?: string, proxyData?: ProxyD
                         path: '/',
                         secure: true,
                         httpOnly: false
-                    }),
-                    newSession.cookies.set({
-                        url: 'https://onlyfans.com',
-                        name: 'auth_id',
-                        value: cookiesData.getCreatorById.creatorAuth?.user_id || '',
-                        domain: '.onlyfans.com',
-                        path: '/',
-                        secure: true,
-                        httpOnly: false
-                    }),
-                    newSession.cookies.set({
-                        url: 'https://onlyfans.com',
-                        name: 'InjectedToken',
-                        value: args.token || '',
-                        domain: '.onlyfans.com',
-                        path: '/',
-                        secure: true,
-                        httpOnly: false
-                    }),
-                    newSession.cookies.set({
-                        url: 'https://onlyfans.com',
-                        name: 'fp',
-                        value: cookiesData.getCreatorById.creatorAuth?.x_bc || '',
-                        domain: '.onlyfans.com',
-                        path: '/',
-                        secure: true,
-                        httpOnly: false
                     })
-                ])
+                )
+
+
+                if (cookiesData.getCreatorById.creatorAuth.user_id) {
+                    cookiePromises.push(
+                        newSession.cookies.set({
+                            url: 'https://onlyfans.com',
+                            name: 'auth_id',
+                            value: cookiesData.getCreatorById.creatorAuth.user_id,
+                            domain: '.onlyfans.com',
+                            path: '/',
+                            secure: true,
+                            httpOnly: false
+                        })
+                    )
+                }
+
+                if (cookiesData.getCreatorById.creatorAuth.user_id) {
+                    cookiePromises.push(
+                        newSession.cookies.set({
+                            url: 'https://onlyfans.com',
+                            name: 'auth_id',
+                            value: cookiesData.getCreatorById.creatorAuth.user_id,
+                            domain: '.onlyfans.com',
+                            path: '/',
+                            secure: true,
+                            httpOnly: false
+                        })
+                    )
+                }
+
+                if (args.token) {
+                    cookiePromises.push(
+                        newSession.cookies.set({
+                            url: 'https://onlyfans.com',
+                            name: 'InjectedToken',
+                            value: args.token,
+                            domain: '.onlyfans.com',
+                            path: '/',
+                            secure: true,
+                            httpOnly: false
+                        })
+                    )
+                }
+
+                if (args.theme) {
+                    cookiePromises.push(
+                        newSession.cookies.set({
+                            url: 'https://onlyfans.com',
+                            name: 'theme',
+                            value: args.theme,
+                            domain: '.onlyfans.com',
+                            path: '/',
+                            secure: true,
+                            httpOnly: false
+                        })
+                    )
+                }
+
+                await Promise.all(cookiePromises)
+
 
                 // Встановлення localStorage
                 for (const [key, value] of Object.entries(localStorageData)) {
-                    await newWindow.webContents.executeJavaScript(`
-                        localStorage.setItem(${JSON.stringify(key)}, ${JSON.stringify(value)});
-                    `)
+                    if (value !== '' && value !== 'null' && value !== null) {
+                        await newWindow.webContents.executeJavaScript(`
+                            localStorage.setItem(${JSON.stringify(key)}, ${JSON.stringify(value)});
+                        `)
+                    }
                 }
 
                 // Перевірка наявності dark_mode
