@@ -1,4 +1,4 @@
-import {BACKEND_URL} from '../env'
+import { BACKEND_URL } from '../env'
 
 export const SAVE_TRACKING_DATA = `
   mutation ChangeChatterTrackingApp($input: ChangeChatterTrackingInput!) {

@@ -1,4 +1,4 @@
-import {BACKEND_URL} from '../env'
+import { BACKEND_URL } from '../env'
 
 export const SCRAP_COOKIES = `
   mutation ChangeCreatorAuthByApp($input: ChangeCreatorAuthInput $changeAppAuthAppInput2: AppDataAppInput) {

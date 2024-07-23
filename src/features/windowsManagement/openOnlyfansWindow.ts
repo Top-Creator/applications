@@ -330,8 +330,12 @@ export const openOnlyfansWindow = async (args: { id?: string, proxyData?: ProxyD
                         const styleBase = document.createElement('style');
                         
                         styleBase.innerHTML =  '.b-reminder-form {  display: none !important; }'+
+                                            '[data-v-d0ae8f1e] .b-chats__conversations-list {max-width: 300px !important; }'+
+                                            '.b-chats__conversations-content {  max-width: 100%; !important;  }'+
+                                             '.b-chats__conversations-content { max-width: calc(100% - 360px)!important;}'+
                                             '.b-chat__messages {  height: 66% !important; flex: unset !important; }'+
-                                             '.b-make-post__textarea-wrapper {  max-height: 100px !important; overflow: auto !important; }'+
+                                            '.swipeout-list {  margin-bottom: 8% !important; }'+
+                                            '.b-make-post__textarea-wrapper {  max-height: 100px !important; overflow: auto !important; }'+
 
                           document.head.appendChild(styleBase);
                  ` )
@@ -340,15 +344,23 @@ export const openOnlyfansWindow = async (args: { id?: string, proxyData?: ProxyD
                     !args.isUserOwnerTeam && newWindow.webContents.executeJavaScript(` 
                     // Додавання стилів
                         const styleLimitation = document.createElement('style');
-                        
+                   
                         styleLimitation.innerHTML = '.l-header__menu__item { display: none !important; }' +
                                            '.dropdown { display: none !important; }' +
                                            '.b-chat__message .g-avatar { display: none !important; }'+
                                            '.g-page__header__btn { display: none !important; }'+
-                                            '.b-chats__item__btn-clear { display: none !important; }'+
-                                             '.b-chat__messages {  height: 65% !important; flex: unset !important; }'+
-                                            '.b-tabs__nav { display: none !important; }' + 
-                                             '.b-make-post__textarea-wrapper {  max-height: 120px !important; overflow: auto !important; }';
+                                           '.b-chats__item__btn-clear { display: none !important; }'+
+                                           '.b-chat__messages {  height: 65% !important; flex: unset !important; }'+
+                                           '.m-main-container {  max-width: 1650px !important; }'+
+                                           '.b-chats__conversations {  max-width: 1650px !important; }'+
+                                           '#content {  max-width: 1650px !important;  margin-right: 5% !important; }'+
+                                           '.b-chats__conversations-list {  max-width: 320px !important;}'+
+                                           '.l-header {  max-width: 120px !important; }'+
+                                           '.swipeout-list {  margin-bottom: 8% !important; }'+
+                                           '.b-chats__conversations-content { max-width: calc(100% - 300px)!important;}'+
+                                           '.switch_container_injection {  flex-direction: column !important; }'+
+                                           '.b-tabs__nav { display: none !important; }' + 
+                                           '.b-make-post__textarea-wrapper {  max-height: 100px !important; overflow: auto !important; }';
 
                           document.head.appendChild(styleLimitation);
                         `)
