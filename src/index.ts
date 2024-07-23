@@ -30,7 +30,7 @@ const createWindow = () => {
             contextIsolation: true,
             nodeIntegration: true,
             preload: path.join(__dirname + '/preloads/mainWindowPreload.js'),
-            devTools: true
+            devTools: false
         }
     })
 

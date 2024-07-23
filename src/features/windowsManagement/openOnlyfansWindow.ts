@@ -17,7 +17,7 @@ export const openOnlyfansWindow = async (args: { id?: string, proxyData?: ProxyD
 
     const { data: userTeamData } = await  getTeamMemberId(cookiesData.getCreatorById.creatorAuth.user_id , args.token)
 
-    let newWindow: BrowserView  | any
+    let newWindow: BrowserView
 
     const userAgent = cookiesData.getCreatorById.creatorAuth.user_agent
     const newSession: Electron.Session = session.fromPartition(`persist:newOnlyfansSession + ${args.id}`, { cache: false })
@@ -51,12 +51,12 @@ export const openOnlyfansWindow = async (args: { id?: string, proxyData?: ProxyD
                 callback({ requestHeaders: details.requestHeaders })
             })
 
-            newWindow = new BrowserWindow({
+            newWindow = new BrowserView({
                 webPreferences: {
                     session: newSession,
                     nodeIntegration: false,
                     contextIsolation: true,
-                    devTools: true
+                    devTools: false
                 }
             })
 
