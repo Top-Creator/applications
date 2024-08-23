@@ -1,3 +1,3 @@
 import { BrowserView } from 'electron'
 
-export type onlyfansWindowsType = Map<string, BrowserView>
+export type onlyfansWindowsType = Map<string, { BrowserView:BrowserView, teamMemberId: string }>

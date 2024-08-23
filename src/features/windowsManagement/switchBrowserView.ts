@@ -2,7 +2,7 @@ import { BrowserWindow } from 'electron'
 import { onlyfansWindowsType } from './types'
 
 export const  switchBrowserView  = async(id: string, theme: string, onlyfansWindows: onlyfansWindowsType, win: BrowserWindow)  =>{
-    const view = onlyfansWindows.get(id)
+    const view = onlyfansWindows.get(id).BrowserView
     win.setBrowserView(view)
 
     // Перевірка наявності dark_mode

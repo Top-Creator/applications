@@ -43,8 +43,8 @@ export const getTeamMemberId = async (user_id: string, token: string): Promise<I
         })
         .then(data => {
             if (data.errors) {
-                console.error('GraphQL errors:', data.errors);
-                throw new Error(data.errors.map((error: any) => error.message).join(', '));
+                console.error('GraphQL errors:', data.errors)
+                throw new Error(data.errors.map((error: any) => error.message).join(', '))
             }
             return data
         })

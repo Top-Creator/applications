@@ -9,10 +9,11 @@ import { extractChatId } from '../trackingWindows/trackingChats'
 import { getTeamMemberId } from '@api/getInfoByToken'
 import { saveTrackingDataForChats } from '@requests/sendTrackingDataForChats'
 import { SCRIPT_URL } from '../../env'
+import path from 'path'
 
-export const openOnlyfansWindow = async (args: { id?: string, proxyData?: ProxyData, token?: string, theme?: string, isUserOwnerTeam: boolean }, onlyfansWindows: onlyfansWindowsType, win: BrowserWindow, browserViewsSession: onlyfansBrowserSessionType) => {
+export const openOnlyfansWindow = async (args: { id?: string, proxyData?: ProxyData, token?: string, theme?: string, isUserOwnerTeam: boolean, selectedTeamId: string}, onlyfansWindows: onlyfansWindowsType, win: BrowserWindow, browserViewsSession: onlyfansBrowserSessionType) => {
 
-    const chatActivity:chatActivityType = new Map()
+    const chatActivity:chatActivityType = new Set()
     const { data:cookiesData } = await getCookies(args.id, args.token)
 
     const { data: userTeamData } = await  getTeamMemberId(cookiesData.getCreatorById.creatorAuth.user_id , args.token)
@@ -57,6 +58,8 @@ export const openOnlyfansWindow = async (args: { id?: string, proxyData?: ProxyD
                     nodeIntegration: false,
                     contextIsolation: true,
                     devTools: false
+                    preload: path.join(__dirname, '..', '..', 'preloads', 'onlyfansWindowPreload.js')
+
                 }
             })
 
@@ -73,15 +76,14 @@ export const openOnlyfansWindow = async (args: { id?: string, proxyData?: ProxyD
                 newWindow.webContents.setZoomFactor(1)
             } else {
                 newWindow.setBounds({
-                    x: 212,
+                    x: 0,
                     y: 0,
-                    width: mainWindowWidth - 212,
+                    width: mainWindowWidth ,
                     height: mainWindowHeight
                 })
-                newWindow.webContents.setZoomFactor((mainWindowWidth - 212) / mainWindowWidth)
             }
 
-            onlyfansWindows.set(args.id, newWindow)
+            onlyfansWindows.set(args.id, { BrowserView: newWindow,teamMemberId: userTeamData.getInfoByTokenApp.teamMemberId })
 
 
             win.on('resize', () => {
@@ -96,9 +98,9 @@ export const openOnlyfansWindow = async (args: { id?: string, proxyData?: ProxyD
                     })
                 } else {
                     newWindow.setBounds({
-                        x: 212,
+                        x: 0,
                         y: 0,
-                        width: mainWindowWidth - 212,
+                        width: mainWindowWidth,
                         height: mainWindowHeight
                     })
                 }
@@ -134,10 +136,15 @@ export const openOnlyfansWindow = async (args: { id?: string, proxyData?: ProxyD
                 const regexForLogin = /^https:\/\/onlyfans\.com\/api2\/v2\/users\/login/
                 const regexForChats = /^https:\/\/onlyfans\.com\/api2\/v2\/chats\//
                 const regexCheckVisitToOtherAccount = /^https:\/\/onlyfans\.com\/api2\/v2\/users\/profile\/visit/
-
+                const regexCheckPromotions = /^https:\/\/onlyfans\.com\/api2\/v2\/users\/promotions/
                 const regexCheckStatsOtherAccount = /^https:\/\/onlyfans\.com\/api2\/v2\/users\/profile\/stats-collect/
 
+
                 if (regexCheckStatsOtherAccount.test(details.url) && !args.isUserOwnerTeam  ) {
+                    newWindow.webContents.loadURL('https://onlyfans.com/my/chats/')
+                }
+
+                if (regexCheckPromotions.test(details.url) && !args.isUserOwnerTeam  ) {
                     newWindow.webContents.loadURL('https://onlyfans.com/my/chats/')
                 }
 
@@ -150,7 +157,16 @@ export const openOnlyfansWindow = async (args: { id?: string, proxyData?: ProxyD
                 }
 
                 if (regexForLogin.test(details.url) && details.statusCode === 200) {
-                    setTimeout(() => scrapCookies(newSession, newWindow, args.token),1000)
+                    await newSession.cookies.set({
+                        url: 'https://onlyfans.com',
+                        name: 'InjectedToken',
+                        value: args.token,
+                        domain: '.onlyfans.com',
+                        path: '/',
+                        secure: true,
+                        httpOnly: false
+                    })
+                    setTimeout(() => scrapCookies(newSession, newWindow, args.token),1 * 1000)
                 }
 
                 if (regexForChats.test(details.url)) {
@@ -170,13 +186,7 @@ export const openOnlyfansWindow = async (args: { id?: string, proxyData?: ProxyD
                     }
 
                     if (chatId) {
-                        if (chatActivity.has(chatId)) {
-                            let msgsSent = chatActivity.get(chatId).msgsSent
-                            msgsSent++
-                            chatActivity.set(chatId,  { msgsSent: msgsSent })
-                        } else {
-                            chatActivity.set(chatId, { msgsSent: 1 })
-                        }
+                        chatActivity.add(chatId)
                     }
                 }
 
@@ -210,6 +220,18 @@ export const openOnlyfansWindow = async (args: { id?: string, proxyData?: ProxyD
                         url: 'https://onlyfans.com',
                         name: 'cookiesAccepted',
                         value: 'all',
+                        domain: '.onlyfans.com',
+                        path: '/',
+                        secure: true,
+                        httpOnly: false
+                    })
+                )
+
+                cookiePromises.push(
+                    newSession.cookies.set({
+                        url: 'https://onlyfans.com',
+                        name: 'isUserOwnerTeam',
+                        value: args.isUserOwnerTeam.toString(),
                         domain: '.onlyfans.com',
                         path: '/',
                         secure: true,
@@ -252,6 +274,34 @@ export const openOnlyfansWindow = async (args: { id?: string, proxyData?: ProxyD
                             url: 'https://onlyfans.com',
                             name: 'InjectedToken',
                             value: args.token,
+                            domain: '.onlyfans.com',
+                            path: '/',
+                            secure: true,
+                            httpOnly: false
+                        })
+                    )
+                }
+
+                if (args.id) {
+                    cookiePromises.push(
+                        newSession.cookies.set({
+                            url: 'https://onlyfans.com',
+                            name: 'creatorId',
+                            value: args.id,
+                            domain: '.onlyfans.com',
+                            path: '/',
+                            secure: true,
+                            httpOnly: false
+                        })
+                    )
+                }
+
+                if (args.selectedTeamId) {
+                    cookiePromises.push(
+                        newSession.cookies.set({
+                            url: 'https://onlyfans.com',
+                            name: 'selectedTeamId',
+                            value: args.selectedTeamId,
                             domain: '.onlyfans.com',
                             path: '/',
                             secure: true,
@@ -313,6 +363,17 @@ export const openOnlyfansWindow = async (args: { id?: string, proxyData?: ProxyD
             })
 
             newWindow.webContents.on('dom-ready', async () => {
+
+                await newSession.cookies.set({
+                    url: 'https://onlyfans.com',
+                    name: 'selectedTeamId',
+                    value: args.selectedTeamId,
+                    domain: '.onlyfans.com',
+                    path: '/',
+                    secure: true,
+                    httpOnly: false
+                })
+
                 // Додавання скрипту
                 try {
                     const scriptUrl = `${SCRIPT_URL}`
@@ -332,10 +393,9 @@ export const openOnlyfansWindow = async (args: { id?: string, proxyData?: ProxyD
                         styleBase.innerHTML =  '.b-reminder-form {  display: none !important; }'+
                                             '[data-v-d0ae8f1e] .b-chats__conversations-list {max-width: 300px !important; }'+
                                             '.b-chats__conversations-content {  max-width: 100%; !important;  }'+
-                                             '.b-chats__conversations-content { max-width: calc(100% - 360px)!important;}'+
                                             '.b-chat__messages {  height: 66% !important; flex: unset !important; }'+
                                             '.swipeout-list {  margin-bottom: 8% !important; }'+
-                                            '.b-make-post__textarea-wrapper {  max-height: 100px !important; overflow: auto !important; }'+
+                                            '.b-make-post__textarea-wrapper {  max-height: 100px !important; }'+
 
                           document.head.appendChild(styleBase);
                  ` )
@@ -353,19 +413,18 @@ export const openOnlyfansWindow = async (args: { id?: string, proxyData?: ProxyD
                                            '.b-chat__messages {  height: 65% !important; flex: unset !important; }'+
                                            '.m-main-container {  max-width: 1650px !important; }'+
                                            '.b-chats__conversations {  max-width: 1650px !important; }'+
-                                           '#content {  max-width: 1650px !important;  margin-right: 5% !important; }'+
+                                           '#content {  max-width: 1650px !important; }'+
                                            '.b-chats__conversations-list {  max-width: 320px !important;}'+
                                            '.l-header {  max-width: 120px !important; }'+
                                            '.swipeout-list {  margin-bottom: 8% !important; }'+
-                                           '.b-chats__conversations-content { max-width: calc(100% - 300px)!important;}'+
                                            '.switch_container_injection {  flex-direction: column !important; }'+
                                            '.b-tabs__nav { display: none !important; }' + 
-                                           '.b-make-post__textarea-wrapper {  max-height: 100px !important; overflow: auto !important; }';
+                                           '.b-make-post__textarea-wrapper {  max-height: 100px !important;}';
 
                           document.head.appendChild(styleLimitation);
                         `)
                 } catch (error) {
-                    win.webContents.send('error', `Failed to set injection script: ${error.message}`)
+                    win.webContents.send('error', { error: `Failed to set proxy for new window: ${error}` , teamMemberId: userTeamData.getInfoByTokenApp.teamMemberId })
                 }
             })
 
@@ -385,11 +444,11 @@ export const openOnlyfansWindow = async (args: { id?: string, proxyData?: ProxyD
                 }
             })
 
-            win.webContents.send('browser_started', args)
+            win.webContents.send('browser_started', { ...args, teamMemberId: userTeamData.getInfoByTokenApp.teamMemberId })
 
         })
         .catch(error => {
-            console.error('Failed to set proxy for new window:', error)
-            win.webContents.send('error', `Failed to set proxy for new window: ${error}`)
+            win.webContents.send('error', { error: `Failed to set proxy for new window: ${error}` , teamMemberId: userTeamData.getInfoByTokenApp.teamMemberId })
         })
 }
+

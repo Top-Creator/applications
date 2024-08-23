@@ -3,6 +3,6 @@ import { onlyfansWindowsType } from './types'
 
 export const hideOnlyfansWindows = (onlyfansWindows: onlyfansWindowsType, win: BrowserWindow) => {
     onlyfansWindows.forEach((view) => {
-        win.removeBrowserView(view)
+        win.removeBrowserView(view.BrowserView)
     })
 }

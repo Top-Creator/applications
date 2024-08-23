@@ -1,7 +1,7 @@
 
 export type onlyfansBrowserSessionType = Map<string, { sessions: trackedSessionType[], activities: trackedActivityType[] }>
 
-export type chatActivityType = Map<string, { msgsSent: number }>
+export type chatActivityType = Set<string>
 
 
 export interface trackedActivityType {
