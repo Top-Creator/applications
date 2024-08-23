@@ -3,7 +3,7 @@ import { onlyfansWindowsType } from '../windowsManagement/types'
 
 export const setThemeWindow = (id: string, theme: string, onlyfansWindows: onlyfansWindowsType, win: BrowserWindow) => {
     if (onlyfansWindows.has(id)) {
-        const window = onlyfansWindows.get(id)
+        const window = onlyfansWindows.get(id).BrowserView
 
         if (theme === 'dark') {
             window.webContents.executeJavaScript(`

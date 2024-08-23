@@ -13,10 +13,10 @@ export const closeAllOnlyfansWindows = (onlyfansWindows:onlyfansWindowsType, win
         }
 
         if (view) {
-            view.webContents.close()
-            win.removeBrowserView(view)
+            view.BrowserView.webContents.close()
+            win.webContents.send('browser_closed', { id, teamMemberId:view.teamMemberId })
+            win.removeBrowserView(view.BrowserView)
             onlyfansWindows.delete(id)
-            win.webContents.send('browser_closed', id)
         }
     })
 }

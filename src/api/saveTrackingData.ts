@@ -10,7 +10,6 @@ export const SAVE_TRACKING_DATA = `
 
 export interface saveTrackingDataInput {
     teamMemberId: string
-    msgsSent: number
     fansChatted: string
 }
 

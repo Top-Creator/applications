@@ -1,11 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron'
-
-export interface ProxyData {
-    host: string
-    port: string
-    userName: string
-    password: string
-}
+import { ProxyData } from '@preloads/mainWindowPreload'
 
 contextBridge.exposeInMainWorld('electron', {
     openOnlyfans: async ({ id, token, proxyData,widthSidebar, theme, isUserOwnerTeam, selectedTeamId }: {
@@ -14,8 +8,8 @@ contextBridge.exposeInMainWorld('electron', {
         token?: string,
         widthSidebar?: number,
         theme?: string,
+        selectedTeamId?: string,
         isUserOwnerTeam?: boolean,
-        selectedTeamId? :string,
     }) => {
         try {
             await ipcRenderer.invoke('open-onlyfans-window', { id, proxyData,token, widthSidebar, theme, isUserOwnerTeam, selectedTeamId })
@@ -30,20 +24,12 @@ contextBridge.exposeInMainWorld('electron', {
         await ipcRenderer.invoke('close-onlyfans-window', { id })
     },
 
-    closeAllWindows: async () => {
-        await ipcRenderer.invoke('close-all-window')
-    },
-
     hideOnlyfansWindows: async () => {
         await ipcRenderer.invoke('hide-onlyfans-windows')
     },
 
     showOnlyfansWindow: async ( id : string) => {
         await ipcRenderer.invoke('show-onlyfans-window', { id })
-    },
-
-    setAppTheme: async (id:string, theme: string) => {
-        await ipcRenderer.invoke('set-dark-theme', { id, theme })
     },
 
     switchOnlyfansWindow: async (id : string ,theme:string) => {
@@ -53,6 +39,13 @@ contextBridge.exposeInMainWorld('electron', {
             await ipcRenderer.invoke('error', error.message)
             throw new Error(error.message)
         }
+    },
+
+    closeAllWindows: async () => {
+        await ipcRenderer.invoke('close-all-window')
+    },
+    setAppTheme: async (id:string, theme: string) => {
+        await ipcRenderer.invoke('set-dark-theme', { id, theme })
     },
 
     onEvent: (eventName, callback) => {
